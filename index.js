@@ -22,23 +22,23 @@ function decorate(code, scope, lang, options, metadata) {
 	if (options.showLineNumbers && lines && lines.length > 1) {
 		const maxWidth = `${lines.length}`.length
 		const highlightLines = options.highlightLines && metadata && metadata.highlight && metadata.highlight.length
-		
+
 		code = lines.map((line, index) => {
-				const lineClasses = highlightLines && metadata.highlight.includes(index + 1) ? `line line-highlighted` : 'line'
-				const lineNumber = `${index + 1}`.padStart(maxWidth)
+			const lineClasses = highlightLines && metadata.highlight.includes(index + 1) ? `line line-highlighted` : 'line'
+			const lineNumber = `${index + 1}`.padStart(maxWidth)
 
-				let decoratedLine = `<span class="${lineClasses}">`
-				decoratedLine += `<span class="line-number" aria-hidden="true">${lineNumber}</span>`
+			let decoratedLine = `<span class="${lineClasses}">`
+			decoratedLine += `<span class="line-number" aria-hidden="true">${lineNumber}</span>`
 
-				if (prompts && prompts.includes(index + 1)) {
-					decoratedLine += `<span class="line-prompt" aria-hidden="true">$</span>`
-				}
-				
-				decoratedLine += line
-				decoratedLine += `</span>`
+			if (prompts && prompts.includes(index + 1)) {
+				decoratedLine += `<span class="line-prompt" aria-hidden="true">$</span>`
+			}
 
-				return decoratedLine
-			})
+			decoratedLine += line
+			decoratedLine += `</span>`
+
+			return decoratedLine
+		})
 			.join('\r\n')
 	} else {
 		let decoratedLine = `<span class="line line-standalone">`
@@ -103,7 +103,7 @@ export default function remarkStarryNight(userOptions) {
 			}
 
 			const metadata = meta ? fenceparser(meta).metadata : null
-			const langId = aliases && aliases[lang] ? aliases[lang] : lang
+			const langId = aliases && aliases[lang] ? aliases[lang] : (lang ? lang : 'text')
 			const scope = starryNight.flagToScope(langId)
 
 			let code = value
@@ -113,7 +113,9 @@ export default function remarkStarryNight(userOptions) {
 				code = toHtml(highlighted)
 					.replace(/[\r\n|\r|\n]*$/, '')	// remove the last newline character
 			} else {
-				console.warn(`Grammar unavailable for ${langId}; rendering the code fence as text`)
+				if (langId !== 'text') {
+					console.warn(`Grammar unavailable for ${langId}; rendering the code fence as text`)
+				}
 			}
 
 			let codeblock
